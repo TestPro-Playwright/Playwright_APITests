@@ -2,11 +2,11 @@ name: Course Enrollment API Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, feature/* ]
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 8 * * 1-5'   # Run every weekday at 8am UTC
+    - cron: '0 8 * * 1-5'
 
 jobs:
   api-tests:
@@ -23,18 +23,20 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
+      - name: Inject credentials into config.properties
+        run: |
+          sed -i 's/YOUR_INSTRUCTOR_USERNAME/${{ secrets.INSTRUCTOR_USERNAME }}/g' src/test/resources/config.properties
+          sed -i 's/YOUR_INSTRUCTOR_PASSWORD/${{ secrets.INSTRUCTOR_PASSWORD }}/g' src/test/resources/config.properties
+          sed -i 's/YOUR_STUDENT_USERNAME/${{ secrets.STUDENT_USERNAME }}/g' src/test/resources/config.properties
+          sed -i 's/YOUR_STUDENT_PASSWORD/${{ secrets.STUDENT_PASSWORD }}/g' src/test/resources/config.properties
+
       - name: Run API tests
-        env:
-          STUDENT_EMAIL:      ${{ secrets.STUDENT_EMAIL }}
-          STUDENT_PASSWORD:   ${{ secrets.STUDENT_PASSWORD }}
-          INSTRUCTOR_EMAIL:   ${{ secrets.INSTRUCTOR_EMAIL }}
-          INSTRUCTOR_PASSWORD: ${{ secrets.INSTRUCTOR_PASSWORD }}
         run: mvn test
 
       - name: Generate Allure report
