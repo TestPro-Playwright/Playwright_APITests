@@ -69,15 +69,12 @@ public class RequestHelper {
         return gson.fromJson(response.text(), clazz);
     }
 
-    // Java Streams support — filter/map over JSON arrays fluently
     public List<JsonObject> toList(JsonArray array) {
         return array.asList()
                 .stream()
                 .map(JsonElement::getAsJsonObject)
                 .toList();
     }
-
-    // ── Assertion ─────────────────────────────────────────────────────────────
 
     public void assertStatus(APIResponse response, int expectedStatus) {
         assertEquals(expectedStatus, response.status(),

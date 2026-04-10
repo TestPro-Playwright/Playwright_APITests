@@ -56,14 +56,14 @@ public class CourseApi {
         return http.delete("/courses/" + courseId);
     }
 
-    // ── Convenience: parse all courses as list ────────────────────────────────
+    // ── Parse all courses as list ────────────────────────────────
     public List<JsonObject> getAllAsList() {
         APIResponse response = getAll();
         http.assertStatus(response, 200);
         return http.toList(http.parseToJsonArray(response));
     }
 
-    // ── Convenience: create course and return its ID ──────────────────────────
+    // ── Create course and return its ID ──────────────────────────
     public String createAndGetId(Course course) {
         APIResponse response = create(course);
         System.out.println("CREATE COURSE RESPONSE: " + response.text());
@@ -71,7 +71,7 @@ public class CourseApi {
         return extractId(http.parseToJson(response));
     }
 
-    // ── Convenience: search by title and return list ──────────────────────────
+    // ── Search by title and return list ──────────────────────────
     public List<JsonObject> searchByTitleAsList(String title) {
         APIResponse response = searchByTitle(title);
         http.assertStatus(response, 200);
