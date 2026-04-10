@@ -5,14 +5,20 @@ import config.ConfigManager;
 import org.junit.jupiter.api.*;
 import utils.RequestHelper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseTest {
 
-    protected Playwright    playwright;
-    protected RequestHelper unauthenticatedHttp;
+    protected Playwright        playwright;
+    protected RequestHelper     unauthenticatedHttp;
+
+    // Registry — all HTTP clients created by subclasses are registered here
+    // BaseTest.tearDown() disposes all of them automatically
+    private final List<RequestHelper> httpClients = new ArrayList<>();
 
     @BeforeAll
     public void setUp() {
@@ -21,9 +27,8 @@ public abstract class BaseTest {
     }
 
     /**
-     * Builds an HTTP client.
-     * Pass a token to get an authenticated client (Authorization: Bearer <token>).
-     * Pass null to get an unauthenticated client for public endpoints.
+     * Builds an authenticated or unauthenticated HTTP client.
+     * Every client created here is automatically registered for disposal.
      */
     protected RequestHelper buildHttpClient(String bearerToken) {
         Map<String, String> headers = new HashMap<>();
@@ -40,11 +45,36 @@ public abstract class BaseTest {
                         .setExtraHTTPHeaders(headers)
                         .setTimeout(ConfigManager.getInt("timeout"))
         );
-        return new RequestHelper(context);
+
+        RequestHelper client = new RequestHelper(context);
+
+        // Register client so tearDown can dispose it automatically
+        httpClients.add(client);
+
+        return client;
     }
 
     @AfterAll
     public void tearDown() {
-        if (playwright != null) playwright.close();
+        // Dispose all registered HTTP clients
+        httpClients.forEach(client -> {
+            try {
+                client.dispose();
+            } catch (Exception e) {
+                System.err.println("Warning: failed to dispose HTTP client: "
+                        + e.getMessage());
+            }
+        });
+        httpClients.clear();
+
+        // Close Playwright engine last
+        try {
+            if (playwright != null) {
+                playwright.close();
+            }
+        } catch (Exception e) {
+            System.err.println("Warning: failed to close Playwright: "
+                    + e.getMessage());
+        }
     }
 }

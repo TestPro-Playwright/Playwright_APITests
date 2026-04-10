@@ -25,6 +25,12 @@ public class RequestHelper {
 
     // ── HTTP Methods ──────────────────────────────────────────────────────────
 
+    public void dispose() {
+        if (request != null) {
+            request.dispose();
+        }
+    }
+
     public APIResponse get(String endpoint) {
         return request.get(endpoint);
     }
