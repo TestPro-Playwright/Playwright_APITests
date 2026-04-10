@@ -59,7 +59,7 @@ Wait for IntelliJ to finish indexing. If prompted to reload Maven,
 click **Reload All Maven Projects** in the Maven panel on the right.
 
 ### 4. Configure Credentials
-Open `src/test/resources/config.properties` and replace all placeholder values 
+Open `src/test/resources/config.properties` and replace all placeholder values
 with the actual instructor and student credentials provided in the submission email:
 
 ```properties
