@@ -1,0 +1,7 @@
+target/
+.allure/
+*.zip
+*.iml
+.idea/
+allure-results/
+CourseEnrollmentAPI_TestReport.zip
