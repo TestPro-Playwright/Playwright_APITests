@@ -21,7 +21,19 @@ public class ConfigManager {
 
     public static String get(String key) {
         String value = props.getProperty(key);
-        if (value == null) throw new RuntimeException("Missing config key: " + key);
+        if (value == null || value.isBlank()) {
+            throw new RuntimeException(
+                    "Missing config value for key: '" + key + "'. " +
+                            "Please update src/test/resources/config.properties before running."
+            );
+        }
+        if (value.startsWith("YOUR_")) {
+            throw new RuntimeException(
+                    "Placeholder value detected for key: '" + key + "'. " +
+                            "Please replace '" + value + "' with the actual value " +
+                            "in src/test/resources/config.properties before running."
+            );
+        }
         return value;
     }
 
