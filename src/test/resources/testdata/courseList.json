@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Introduction to Java",
+    "courseCode": "JAVA101",
+    "category": "Programming",
+    "totalCapacity": 30,
+    "startDate": "2026-03-01",
+    "endDate": "2026-06-01"
+  },
+  {
+    "title": "Java Spring Boot",
+    "courseCode": "JAVA201",
+    "category": "Programming",
+    "totalCapacity": 25,
+    "startDate": "2026-03-01",
+    "endDate": "2026-06-01"
+  },
+  {
+    "title": "Data Structures in Java",
+    "courseCode": "JAVA301",
+    "category": "Computer Science",
+    "totalCapacity": 20,
+    "startDate": "2026-04-01",
+    "endDate": "2026-07-01"
+  },
+  {
+    "title": "Advanced Python",
+    "courseCode": "PY201",
+    "category": "Programming",
+    "totalCapacity": 15,
+    "startDate": "2026-04-01",
+    "endDate": "2026-07-01"
+  },
+  {
+    "title": "REST API Design",
+    "courseCode": "API101",
+    "category": "Software Engineering",
+    "totalCapacity": 30,
+    "startDate": "2026-05-01",
+    "endDate": "2026-08-01"
+  }
+]
