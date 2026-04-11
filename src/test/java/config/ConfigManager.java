@@ -12,28 +12,42 @@ public class ConfigManager {
         try (InputStream input = ConfigManager.class
                 .getClassLoader()
                 .getResourceAsStream("config.properties")) {
-            if (input == null) throw new RuntimeException("config.properties not found");
+            if (input == null)
+                throw new RuntimeException(
+                        "config.properties not found in src/test/resources/");
             props.load(input);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load config.properties", e);
+            throw new RuntimeException(
+                    "Failed to load config.properties: " + e.getMessage(), e);
         }
     }
 
     public static String get(String key) {
+        // Check system property first — allows CI/CD to override config.properties
+        String systemValue = System.getProperty(key);
+        if (systemValue != null && !systemValue.isBlank()
+                && !systemValue.startsWith("YOUR_")) {
+            return systemValue;
+        }
+
         String value = props.getProperty(key);
+
         if (value == null || value.isBlank()) {
             throw new RuntimeException(
                     "Missing config value for key: '" + key + "'. " +
-                            "Please update src/test/resources/config.properties before running."
-            );
+                            "Please update src/test/resources/config.properties " +
+                            "before running the tests.");
         }
-        if (value.startsWith("YOUR_")) {
+
+        // Only validate placeholder for credential keys — not test data keys
+        if (value.startsWith("YOUR_") && !key.startsWith("invalid.")) {
             throw new RuntimeException(
                     "Placeholder value detected for key: '" + key + "'. " +
                             "Please replace '" + value + "' with the actual value " +
-                            "in src/test/resources/config.properties before running."
-            );
+                            "provided in the submission email, in " +
+                            "src/test/resources/config.properties before running.");
         }
+
         return value;
     }
 

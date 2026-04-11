@@ -294,6 +294,54 @@ class InstructorCourseTest extends BaseTest {
                 + " — confirmed removed from catalog");
     }
 
+    @Test
+    @Order(6)
+    @DisplayName("POST /courses — missing required fields should return 400")
+    @Story("Course Creation — Negative")
+    @Severity(SeverityLevel.NORMAL)
+    void createCourse_missingRequiredFields_returns400() {
+        // Send empty course object — all fields missing
+        APIResponse response = instructorCourseApi.create(new Course());
+
+        AssertionHelper.assertBadRequest(response);
+        AssertionHelper.assertErrorMessagePresent(response);
+
+        System.out.println("400 PASSED — Missing fields correctly rejected: "
+                + response.text());
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("POST /courses — duplicate course code should return 400")
+    @Story("Course Creation — Negative")
+    @Severity(SeverityLevel.NORMAL)
+    void createCourse_duplicateCourseCode_returns400() {
+        assertFalse(createdCourses.isEmpty(),
+                "Prerequisite: courses must exist from step 1a");
+
+        // Use a course code already created in step 1a
+        String existingCode = createdCourses.get(0)
+                .get("courseCode").getAsString();
+
+        Course duplicate = Course.create(
+                "Duplicate Course",
+                ConfigManager.get("instructor.username"),
+                existingCode,
+                "Testing",
+                10,
+                "2026-03-01",
+                "2026-06-01"
+        );
+
+        APIResponse response = instructorCourseApi.create(duplicate);
+
+        AssertionHelper.assertBadRequest(response);
+        AssertionHelper.assertErrorMessagePresent(response);
+
+        System.out.println("400 PASSED — Duplicate course code correctly rejected: "
+                + response.text());
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**

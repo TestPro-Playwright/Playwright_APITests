@@ -13,7 +13,7 @@ import report.AssertionHelper;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Epic("Course Enrollment System")
 @Feature("Authentication")
-class AuthTests extends BaseTest {
+class AuthTest extends BaseTest {
 
     private AuthApi authApi;
 

@@ -80,13 +80,22 @@ public class CourseApi {
     }
 
     private String extractId(JsonObject body) {
-        if (body.has("_id"))  return body.get("_id").getAsString();
-        if (body.has("id"))   return body.get("id").getAsString();
-        if (body.has("course")) {
+        // Handle { "newCourse": { "_id": "..." } } — create response shape
+        if (body.has("newCourse") && body.get("newCourse").isJsonObject()) {
+            JsonObject newCourse = body.getAsJsonObject("newCourse");
+            if (newCourse.has("_id")) return newCourse.get("_id").getAsString();
+            if (newCourse.has("id"))  return newCourse.get("id").getAsString();
+        }
+        // Handle { "course": { "_id": "..." } }
+        if (body.has("course") && body.get("course").isJsonObject()) {
             JsonObject course = body.getAsJsonObject("course");
             if (course.has("_id")) return course.get("_id").getAsString();
             if (course.has("id"))  return course.get("id").getAsString();
         }
+        // Handle flat { "_id": "..." }
+        if (body.has("_id")) return body.get("_id").getAsString();
+        if (body.has("id"))  return body.get("id").getAsString();
+
         throw new RuntimeException(
                 "Could not extract course ID from response: " + body);
     }
