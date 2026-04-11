@@ -7,7 +7,6 @@ import config.ConfigManager;
 import io.qameta.allure.*;
 import models.LoginRequest;
 import org.junit.jupiter.api.*;
-import report.AssertionHelper;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

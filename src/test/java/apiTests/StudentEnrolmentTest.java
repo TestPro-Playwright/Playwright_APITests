@@ -88,11 +88,7 @@ class StudentEnrolmentTest extends BaseTest {
         unauthenticatedHttp.assertStatus(availabilityResponse, 200);
 
         JsonObject availBody = unauthenticatedHttp.parseToJson(availabilityResponse);
-
-        assertTrue(availBody.has("available") || availBody.has("availableSlots")
-                        || availBody.has("totalCapacity"),
-                "Availability response should contain availability information. Body: "
-                        + availBody);
+        AssertionHelper.assertCourseAvailable(availBody);
 
         System.out.println("2a PASSED — Availability checked for course: "
                 + targetCourseCode + " | Response: " + availBody);

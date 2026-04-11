@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,12 +138,18 @@ class InstructorCourseTest extends BaseTest {
         AssertionHelper.assertArrayNotEmpty(results, "Search by title 'Java'");
 
         // Verify all results contain 'java' in the title (case-insensitive)
+        instructorHttp.toList(results).forEach(course -> {
+            AssertionHelper.assertFieldNotBlank(course, "title");
+            AssertionHelper.assertFieldNotBlank(course, "courseCode");
+            AssertionHelper.assertFieldNotBlank(course, "instructor");
+        });
+
         boolean allMatch = instructorHttp.toList(results).stream()
                 .allMatch(c -> c.has("title") &&
                         c.get("title").getAsString().toLowerCase().contains("java"));
 
         assertTrue(allMatch,
-                "All search results should contain 'Java' in the title");
+                "All results should contain 'Java' in the title");
 
         System.out.println("1b PASSED — Search by title 'Java' returned "
                 + instructorHttp.toList(results).size() + " results");
@@ -194,14 +199,11 @@ class InstructorCourseTest extends BaseTest {
             if (response.status() == 200 && !response.text().isBlank()
                     && !response.text().equals("{}")) {
                 JsonObject body = instructorHttp.parseToJson(response);
-                if (body.has("totalCapacity")) {
-                    assertEquals(5, body.get("totalCapacity").getAsInt(),
-                            "totalCapacity should be updated to 5 for course: " + courseId);
-                }
-                if (body.has("availableSlots")) {
-                    assertEquals(5, body.get("availableSlots").getAsInt(),
-                            "availableSlots should be updated to 5 for course: " + courseId);
-                }
+                JsonObject updatedCourse = body.has("updatedCourse")
+                        ? body.getAsJsonObject("updatedCourse")
+                        : body;
+                AssertionHelper.assertFieldEquals(updatedCourse, "totalCapacity", "5");
+                AssertionHelper.assertFieldEquals(updatedCourse, "availableSlots", "5");
             }
         }
         System.out.println("1c PASSED — Updated totalCapacity and availableSlots to 5 for 3 courses: "
@@ -343,17 +345,6 @@ class InstructorCourseTest extends BaseTest {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /**
-     * Extracts the course object from the API response.
-     */
-    private JsonObject extractCourseObject(JsonObject body) {
-        if (body.has("newCourse") && body.get("newCourse").isJsonObject())
-            return body.getAsJsonObject("newCourse");
-        if (body.has("course") && body.get("course").isJsonObject())
-            return body.getAsJsonObject("course");
-        return body;
-    }
 
     /**
      * Extracts the "_id" (MongoDB) from a course JsonObject.

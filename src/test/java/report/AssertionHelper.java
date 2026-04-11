@@ -2,7 +2,6 @@ package report;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.microsoft.playwright.APIResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,18 +26,6 @@ public class AssertionHelper {
                 "Field '" + field + "' should not be blank. Body: " + body);
     }
 
-    public static void assertIdPresent(JsonObject body) {
-        boolean hasId = body.has("id") || body.has("_id");
-        assertTrue(hasId,
-                "Response should contain an 'id' or '_id' field. Body: " + body);
-    }
-
-    public static void assertTokenPresent(JsonObject body) {
-        boolean hasToken = body.has("token") || body.has("accessToken");
-        assertTrue(hasToken,
-                "Login response should contain a token. Body: " + body);
-    }
-
     public static void assertArrayNotEmpty(JsonArray array, String context) {
         assertNotNull(array, context + " — response array should not be null");
         assertTrue(array.size() > 0,
@@ -46,17 +33,29 @@ public class AssertionHelper {
     }
 
     public static void assertCourseAvailable(JsonObject body) {
-        assertTrue(body.has("available"),
-                "Availability response missing 'available' field. Body: " + body);
-        assertTrue(body.get("available").getAsBoolean(),
-                "Course should be available but was reported as unavailable");
-    }
+        if (body.has("available")) {
+            assertTrue(body.get("available").getAsBoolean(),
+                    "Course should be available but was reported unavailable. Body: "
+                            + body);
+            return;
+        }
 
-    public static void assertSuccess(APIResponse response) {
-        assertTrue(
-                response.status() == 200 || response.status() == 201,
-                "Expected 200 or 201. Got: " + response.status()
-                        + " Body: " + response.text());
+        if (body.has("availableSlots")) {
+            assertTrue(body.get("availableSlots").getAsInt() > 0,
+                    "Course should have available slots but availableSlots was 0. Body: "
+                            + body);
+            return;
+        }
+
+        if (body.has("totalCapacity")) {
+            assertTrue(body.get("totalCapacity").getAsInt() > 0,
+                    "Course should have capacity but totalCapacity was 0. Body: "
+                            + body);
+            return;
+        }
+
+        fail("Availability response missing expected fields "
+                + "('available', 'availableSlots' or 'totalCapacity'). Body: " + body);
     }
 
     public static void assertBadRequest(APIResponse response) {
