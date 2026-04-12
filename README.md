@@ -35,7 +35,6 @@ git --version
 ### 1. Clone the Repository
 ```bash
 git clone https://https://github.com/TestPro-Playwright/Playwright_APITests.git
-cd Playwright_APITests
 ```
 
 ### 2. Install Dependencies
