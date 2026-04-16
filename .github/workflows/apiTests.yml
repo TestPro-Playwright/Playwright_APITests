@@ -1,0 +1,58 @@
+name: Course Enrollment API Tests
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 8 * * 1-5'
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Inject credentials into config.properties
+        run: |
+          sed -i 's/YOUR_INSTRUCTOR_USERNAME/${{ secrets.INSTRUCTOR_USERNAME }}/g' src/test/resources/config.properties
+          sed -i 's/YOUR_INSTRUCTOR_PASSWORD/${{ secrets.INSTRUCTOR_PASSWORD }}/g' src/test/resources/config.properties
+          sed -i 's/YOUR_STUDENT_USERNAME/${{ secrets.STUDENT_USERNAME }}/g' src/test/resources/config.properties
+          sed -i 's/YOUR_STUDENT_PASSWORD/${{ secrets.STUDENT_PASSWORD }}/g' src/test/resources/config.properties
+
+      - name: Run API tests
+        run: mvn test
+
+      - name: Generate Allure report
+        if: always()
+        run: mvn allure:report
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: target/site/allure-maven-plugin/
+
+      - name: Upload Surefire results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-results
+          path: target/surefire-reports/
